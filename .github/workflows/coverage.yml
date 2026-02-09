@@ -36,7 +36,7 @@ jobs:
     - name: Run tests with coverage
       run: |
         echo "=== Testing cogito library ==="
-        go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+        go test -v -race -tags=testing -coverprofile=coverage.out -covermode=atomic ./...
 
         # Generate coverage report
         go tool cover -func=coverage.out > coverage-summary.txt

@@ -36,7 +36,7 @@ jobs:
 
       - name: Run tests
         run: |
-          go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+          go test -v -race -tags=testing -coverprofile=coverage.txt -covermode=atomic ./...
 
       - name: Run linting
         uses: golangci/golangci-lint-action@v7
