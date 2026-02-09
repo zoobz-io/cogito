@@ -80,10 +80,24 @@
 //
 // # Memory Implementation
 //
-// The [SoyMemory] implementation uses soy for PostgreSQL persistence
-// with pgvector for semantic search:
+// Implement the [Memory] interface for your storage backend. The interface
+// defines persistence for Thoughts and Notes, plus semantic search via
+// vector embeddings.
 //
-//	memory, err := cogito.NewSoyMemory(db)
+// # Data Catalog
+//
+// Cogito integrates with data catalogs (like scio) via the [Catalog] interface.
+// This enables type-agnostic access to user data during reasoning:
+//
+//   - [NewFetch] - Retrieve data from any catalog URI
+//   - [NewFetchDynamic] - Fetch with URI constructed from thought content
+//   - [NewDiscover] - List available data sources
+//   - [NewRelate] - Find resources sharing the same schema
+//
+// Use [SetCatalog] or [WithCatalog] to configure catalog access:
+//
+//	cogito.SetCatalog(myCatalog)
+//	fetch := cogito.NewFetch("user", "db://users/alice")
 //
 // # Observability
 //

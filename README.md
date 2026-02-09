@@ -50,7 +50,7 @@ Introspection adds a semantic summary explaining _why_ — context for subsequen
 go get github.com/zoobzio/cogito
 ```
 
-Requires Go 1.21+, PostgreSQL with pgvector (for Memory).
+Requires Go 1.21+.
 
 ## Quick Start
 
@@ -78,8 +78,8 @@ func main() {
     cogito.SetProvider(myLLMProvider)
     cogito.SetEmbedder(cogito.NewOpenAIEmbedder(apiKey))
 
-    // Connect to memory
-    memory, _ := cogito.NewSoyMemory(db)
+    // Connect to memory (implement cogito.Memory interface)
+    memory := NewMyMemory()
 
     // Build a reasoning pipeline
     pipeline := cogito.Sequence("ticket-triage",

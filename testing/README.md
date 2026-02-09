@@ -13,8 +13,7 @@ testing/
 │   ├── README.md
 │   └── benchmarks_test.go
 └── integration/        # Integration tests
-    ├── README.md
-    └── soy_test.go
+    └── README.md
 ```
 
 ## Test Utilities
@@ -58,12 +57,9 @@ make test-unit
 
 ### Integration Tests
 
-Integration tests require PostgreSQL with pgvector extension.
+Integration tests require a Memory implementation and any external dependencies it needs.
 
 ```bash
-# Set up test database
-export TEST_DATABASE_URL="postgres://user:pass@localhost:5432/cogito_test?sslmode=disable"
-
 # Run integration tests
 make test-integration
 ```
