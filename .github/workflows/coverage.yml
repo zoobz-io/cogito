@@ -29,14 +29,12 @@ jobs:
         cache: true
 
     - name: Install dependencies
-      run: |
-        go mod download
-        go install github.com/boumenot/gocover-cobertura@latest
+      run: go mod download
 
     - name: Run tests with coverage
       run: |
         echo "=== Testing cogito library ==="
-        go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+        go test -v -race -tags=testing -coverprofile=coverage.out -covermode=atomic ./...
 
         # Generate coverage report
         go tool cover -func=coverage.out > coverage-summary.txt
@@ -45,9 +43,6 @@ jobs:
 
         # Generate HTML report
         go tool cover -html=coverage.out -o coverage.html
-
-        # Convert to Cobertura format for better PR integration
-        gocover-cobertura < coverage.out > coverage.xml
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4

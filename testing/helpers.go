@@ -1,3 +1,5 @@
+//go:build testing
+
 // Package cogitotest provides test utilities for cogito.
 package cogitotest
 
