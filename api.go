@@ -1,21 +1,20 @@
-// Package cogito provides LLM-powered reasoning chains with semantic memory for Go.
+// Package cogito provides LLM-powered reasoning chains for Go.
 //
-// cogito implements a Thought-Note-Memory architecture for building autonomous
-// systems that reason, remember, and adapt.
+// cogito implements a Thought-Note architecture for building autonomous
+// systems that reason and adapt.
 //
 // # Core Types
 //
-// The package is built around three core concepts:
+// The package is built around two core concepts:
 //
 //   - [Thought] - A reasoning context that accumulates information across pipeline steps
-//   - [Note] - Atomic units of information (key-value pairs with optional embeddings)
-//   - [Memory] - Persistent storage with semantic search via vector embeddings
+//   - [Note] - Atomic units of information (key-value pairs with metadata)
 //
 // # Creating Thoughts
 //
-// Use [New], [NewWithTrace], or [NewForTask] to create thoughts:
+// Use [New] or [NewWithTrace] to create thoughts:
 //
-//	thought, err := cogito.New(ctx, memory, "analyze customer feedback")
+//	thought := cogito.New(ctx, "analyze customer feedback")
 //	thought.SetContent(ctx, "feedback", customerMessage, "input")
 //
 // # Primitives
@@ -33,17 +32,11 @@
 //   - [NewSift] - Semantic gate - LLM decides whether to execute wrapped processor
 //   - [NewDiscern] - Semantic router - LLM classifies and routes to different processors
 //
-// Memory & Reflection:
-//   - [NewRecall] - Load another Thought and summarize its context
+// Reflection:
 //   - [NewReflect] - Consolidate current Thought's Notes into a summary
-//   - [NewCheckpoint] - Create persistent snapshot for branching
-//   - [NewSeek] - Semantic search across Notes
-//   - [NewSurvey] - Search grouped by task
-//   - [NewForget] - Remove notes by key pattern
-//   - [NewRestore] - Restore thought state from checkpoint
-//   - [NewReset] - Clear all notes from thought
 //
 // Session Management:
+//   - [NewReset] - Clear session state
 //   - [NewCompress] - LLM-summarize session history to reduce tokens
 //   - [NewTruncate] - Sliding window session trimming (no LLM)
 //
@@ -65,39 +58,17 @@
 //   - [Concurrent] - Run processors in parallel
 //   - [Race] - Return first successful result
 //
-// # Provider & Embedder
+// # Provider
 //
-// LLM and embedding access uses a resolution hierarchy:
+// LLM access uses a resolution hierarchy:
 //
 //  1. Explicit parameter (.WithProvider(p))
 //  2. Context value (cogito.WithProvider(ctx, p))
 //  3. Global default (cogito.SetProvider(p))
 //
-// Use [SetProvider] and [SetEmbedder] to configure global defaults:
+// Use [SetProvider] to configure the global default:
 //
 //	cogito.SetProvider(myProvider)
-//	cogito.SetEmbedder(cogito.NewOpenAIEmbedder(apiKey))
-//
-// # Memory Implementation
-//
-// Implement the [Memory] interface for your storage backend. The interface
-// defines persistence for Thoughts and Notes, plus semantic search via
-// vector embeddings.
-//
-// # Data Catalog
-//
-// Cogito integrates with data catalogs (like scio) via the [Catalog] interface.
-// This enables type-agnostic access to user data during reasoning:
-//
-//   - [NewFetch] - Retrieve data from any catalog URI
-//   - [NewFetchDynamic] - Fetch with URI constructed from thought content
-//   - [NewDiscover] - List available data sources
-//   - [NewRelate] - Find resources sharing the same schema
-//
-// Use [SetCatalog] or [WithCatalog] to configure catalog access:
-//
-//	cogito.SetCatalog(myCatalog)
-//	fetch := cogito.NewFetch("user", "db://users/alice")
 //
 // # Observability
 //

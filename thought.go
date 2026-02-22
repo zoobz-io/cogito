@@ -24,7 +24,6 @@ type Note struct {
 	Metadata  map[string]string `db:"metadata" type:"jsonb" default:"'{}'"`
 	Source    string            `db:"source" type:"text" constraints:"notnull"`
 	Created   time.Time         `db:"created" type:"timestamp" constraints:"notnull"`
-	Embedding Vector            `db:"embedding" type:"vector(1536)"`
 }
 
 // Thought represents the rolling context of a chain of thought.
@@ -54,14 +53,9 @@ type Thought struct {
 
 	// Lineage
 	ParentID *string `db:"parent_id" type:"uuid" references:"thoughts(id)"`
-	TaskID   *string `db:"task_id" type:"uuid"`
 
 	// LLM conversation state
-	Session *zyn.Session // Shared session for LLM continuity (not persisted)
-
-	// Persistence
-	memory   Memory   // Reference to memory for note persistence
-	embedder Embedder // Reference to embedder for note embeddings (optional)
+	Session *zyn.Session // Shared session for LLM continuity
 
 	// Append-only note history
 	notes          []Note
@@ -74,99 +68,51 @@ type Thought struct {
 	UpdatedAt time.Time `db:"updated_at" type:"timestamp" constraints:"notnull"`
 }
 
-// New creates a new Thought with the given intent and persists it.
-// TraceID is auto-generated using UUID. ID is assigned by the database.
-func New(ctx context.Context, memory Memory, intent string) (*Thought, error) {
+// New creates a new Thought with the given intent.
+// ID and TraceID are auto-generated using UUID.
+func New(ctx context.Context, intent string) *Thought {
 	t := &Thought{
+		ID:             uuid.New().String(),
 		Intent:         intent,
 		TraceID:        uuid.New().String(),
 		Session:        zyn.NewSession(),
-		memory:         memory,
 		notes:          make([]Note, 0),
 		publishedCount: 0,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
 	}
 
-	persisted, err := memory.CreateThought(ctx, t)
-	if err != nil {
-		return nil, fmt.Errorf("failed to persist thought: %w", err)
-	}
-
-	// Copy the database-assigned ID back
-	t.ID = persisted.ID
-
-	// Emit thought creation event
 	capitan.Emit(ctx, ThoughtCreated,
 		FieldIntent.Field(t.Intent),
 		FieldTraceID.Field(t.TraceID),
 	)
 
-	return t, nil
+	return t
 }
 
-// NewWithTrace creates a new Thought with an explicit trace ID and persists it.
-func NewWithTrace(ctx context.Context, memory Memory, intent, traceID string) (*Thought, error) {
+// NewWithTrace creates a new Thought with an explicit trace ID.
+func NewWithTrace(ctx context.Context, intent, traceID string) *Thought {
 	t := &Thought{
+		ID:             uuid.New().String(),
 		Intent:         intent,
 		TraceID:        traceID,
 		Session:        zyn.NewSession(),
-		memory:         memory,
 		notes:          make([]Note, 0),
 		publishedCount: 0,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
 	}
 
-	persisted, err := memory.CreateThought(ctx, t)
-	if err != nil {
-		return nil, fmt.Errorf("failed to persist thought: %w", err)
-	}
-
-	// Copy the database-assigned ID back
-	t.ID = persisted.ID
-
-	// Emit thought creation event
 	capitan.Emit(ctx, ThoughtCreated,
 		FieldIntent.Field(t.Intent),
 		FieldTraceID.Field(t.TraceID),
 	)
 
-	return t, nil
+	return t
 }
 
-// NewForTask creates a new Thought associated with a task and persists it.
-func NewForTask(ctx context.Context, memory Memory, intent, taskID string) (*Thought, error) {
-	t := &Thought{
-		Intent:         intent,
-		TraceID:        uuid.New().String(),
-		TaskID:         &taskID,
-		Session:        zyn.NewSession(),
-		memory:         memory,
-		notes:          make([]Note, 0),
-		publishedCount: 0,
-		CreatedAt:      time.Now(),
-		UpdatedAt:      time.Now(),
-	}
-
-	persisted, err := memory.CreateThought(ctx, t)
-	if err != nil {
-		return nil, fmt.Errorf("failed to persist thought: %w", err)
-	}
-
-	t.ID = persisted.ID
-
-	capitan.Emit(ctx, ThoughtCreated,
-		FieldIntent.Field(t.Intent),
-		FieldTraceID.Field(t.TraceID),
-	)
-
-	return t, nil
-}
-
-// AddNote adds a new note to the thought and persists it.
+// AddNote adds a new note to the thought.
 // If a note with the same key exists, the new note becomes the current value.
-// If an embedder is configured, the note content will be embedded for semantic search.
 func (t *Thought) AddNote(ctx context.Context, note Note) error {
 	t.mu.Lock()
 	defer t.mu.Unlock()
@@ -174,36 +120,13 @@ func (t *Thought) AddNote(ctx context.Context, note Note) error {
 	if note.Created.IsZero() {
 		note.Created = time.Now()
 	}
+	note.ID = uuid.New().String()
 	note.ThoughtID = t.ID
-
-	// Generate embedding if embedder is available
-	embedder, err := ResolveEmbedder(ctx, t.embedder)
-	if err == nil && embedder != nil {
-		embedding, embedErr := embedder.Embed(ctx, note.Content)
-		if embedErr != nil {
-			// Log but don't fail - embedding is optional
-			capitan.Emit(ctx, NoteAdded,
-				FieldTraceID.Field(t.TraceID),
-				FieldNoteKey.Field(note.Key),
-				FieldError.Field(fmt.Errorf("embedding failed: %w", embedErr)),
-			)
-		} else {
-			note.Embedding = embedding
-		}
-	}
-
-	// Persist the note
-	persisted, err := t.memory.AddNote(ctx, &note)
-	if err != nil {
-		return fmt.Errorf("failed to persist note: %w", err)
-	}
-	note.ID = persisted.ID
 
 	t.notes = append(t.notes, note)
 	t.index.Store(note.Key, len(t.notes)-1)
 	t.UpdatedAt = time.Now()
 
-	// Emit note added event
 	capitan.Emit(ctx, NoteAdded,
 		FieldTraceID.Field(t.TraceID),
 		FieldNoteKey.Field(note.Key),
@@ -358,8 +281,8 @@ func (t *Thought) GetInt(key string) (int, error) {
 // to the clone do not affect the original and vice versa.
 //
 // Note: Clone should only be called when the original thought is not being
-// concurrently modified. The Session.Messages() call is internally synchronized,.
-// but concurrent writes to the original thought during clone could result in.
+// concurrently modified. The Session.Messages() call is internally synchronized,
+// but concurrent writes to the original thought during clone could result in
 // an inconsistent snapshot.
 func (t *Thought) Clone() *Thought {
 	t.mu.RLock()
@@ -370,10 +293,7 @@ func (t *Thought) Clone() *Thought {
 		Intent:         t.Intent,
 		TraceID:        t.TraceID,
 		ParentID:       t.ParentID,
-		TaskID:         t.TaskID,
 		Session:        zyn.NewSession(),
-		memory:         t.memory,
-		embedder:       t.embedder,
 		notes:          make([]Note, len(t.notes)),
 		publishedCount: t.publishedCount,
 		CreatedAt:      t.CreatedAt,
@@ -383,16 +303,11 @@ func (t *Thought) Clone() *Thought {
 	// Copy session messages (Session.Messages() returns a copy and is internally synchronized)
 	clone.Session.SetMessages(t.Session.Messages())
 
-	// Deep copy notes (Note is value type, but Metadata is map and Embedding is slice)
+	// Deep copy notes (Note is value type, but Metadata is a map)
 	for i, note := range t.notes {
 		clonedMeta := make(map[string]string, len(note.Metadata))
 		for k, v := range note.Metadata {
 			clonedMeta[k] = v
-		}
-		var clonedEmbedding Vector
-		if note.Embedding != nil {
-			clonedEmbedding = make(Vector, len(note.Embedding))
-			copy(clonedEmbedding, note.Embedding)
 		}
 		clone.notes[i] = Note{
 			ID:        note.ID,
@@ -402,7 +317,6 @@ func (t *Thought) Clone() *Thought {
 			Metadata:  clonedMeta,
 			Source:    note.Source,
 			Created:   note.Created,
-			Embedding: clonedEmbedding,
 		}
 	}
 
@@ -444,49 +358,16 @@ func (t *Thought) GetUnpublishedNotes() []Note {
 	return unpublished
 }
 
-// SetMemory sets the memory reference for persistence operations.
-// This is used when hydrating a Thought from the database.
-func (t *Thought) SetMemory(m Memory) {
-	t.memory = m
-}
-
-// Memory returns the memory reference for this Thought.
-func (t *Thought) Memory() Memory {
-	return t.memory
-}
-
-// SetEmbedder sets the embedder for generating note embeddings.
-// When set, notes will be embedded on creation for semantic search.
-func (t *Thought) SetEmbedder(e Embedder) {
-	t.embedder = e
-}
-
-// Embedder returns the embedder reference for this Thought.
-func (t *Thought) Embedder() Embedder {
-	return t.embedder
-}
-
-// AddNoteWithoutPersist adds a note to the in-memory state without persisting.
-// This is used when hydrating a Thought from the database.
-func (t *Thought) AddNoteWithoutPersist(note Note) {
-	t.mu.Lock()
-	defer t.mu.Unlock()
-
-	t.notes = append(t.notes, note)
-	t.index.Store(note.Key, len(t.notes)-1)
-	t.UpdatedAt = time.Now()
-}
-
 // MarkNotesPublished marks all current notes as published to the LLM.
 // This should be called after successfully sending notes to a synapse.
-func (t *Thought) MarkNotesPublished() {
+func (t *Thought) MarkNotesPublished(ctx context.Context) {
 	t.mu.Lock()
 	previousPublished := t.publishedCount
 	t.publishedCount = len(t.notes)
 	t.mu.Unlock()
 
 	// Emit notes published event
-	capitan.Emit(context.Background(), NotesPublished,
+	capitan.Emit(ctx, NotesPublished,
 		FieldTraceID.Field(t.TraceID),
 		FieldPublishedCount.Field(t.publishedCount),
 		FieldUnpublishedCount.Field(t.publishedCount-previousPublished),

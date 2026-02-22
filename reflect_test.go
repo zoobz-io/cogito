@@ -41,7 +41,7 @@ func TestReflect_FailsOnEmptyUnpublished(t *testing.T) {
 	ctx := context.Background()
 	thought := newTestThought("test")
 	thought.SetContent(ctx, "key1", "value1", "test")
-	thought.MarkNotesPublished()
+	thought.MarkNotesPublished(ctx)
 
 	reflect := NewReflect("reflection").WithUnpublishedOnly()
 	_, err := reflect.Process(ctx, thought)

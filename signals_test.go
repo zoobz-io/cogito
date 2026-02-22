@@ -137,7 +137,7 @@ func TestNotesPublishedEvent(t *testing.T) {
 	thought := newTestThought("test")
 	thought.SetContent(context.Background(), "key1", "value1", "source1")
 	thought.SetContent(context.Background(), "key2", "value2", "source2")
-	thought.MarkNotesPublished()
+	thought.MarkNotesPublished(context.Background())
 
 	// Wait for event.
 	deadline := time.Now().Add(time.Second)
@@ -444,7 +444,7 @@ func TestEventTraceIDCorrelation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("step failed: %v", err)
 	}
-	result.MarkNotesPublished()
+	result.MarkNotesPublished(context.Background())
 
 	// Wait for events (expect at least 5: thought created, note added, step started, step completed, notes published).
 	deadline := time.Now().Add(time.Second)

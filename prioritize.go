@@ -162,7 +162,7 @@ func (r *Prioritize) Process(ctx context.Context, t *Thought) (*Thought, error) 
 	}
 
 	// Mark notes as published
-	t.MarkNotesPublished()
+	t.MarkNotesPublished(ctx)
 
 	// Emit step completed
 	duration := time.Since(start)
@@ -185,22 +185,18 @@ func (r *Prioritize) resolveItems(t *Thought) ([]string, error) {
 	}
 
 	// Mode 2: Read items from specific note key
-	if r.itemsKey != "" {
-		itemsJSON, err := t.GetContent(r.itemsKey)
-		if err != nil {
-			return nil, fmt.Errorf("prioritize: items note %q not found: %w", r.itemsKey, err)
-		}
-		var items []string
-		if err := json.Unmarshal([]byte(itemsJSON), &items); err != nil {
-			return nil, fmt.Errorf("prioritize: failed to parse items from %q: %w", r.itemsKey, err)
-		}
-		if len(items) == 0 {
-			return nil, fmt.Errorf("prioritize: no items to rank")
-		}
-		return items, nil
+	itemsJSON, err := t.GetContent(r.itemsKey)
+	if err != nil {
+		return nil, fmt.Errorf("prioritize: items note %q not found: %w", r.itemsKey, err)
 	}
-
-	return nil, fmt.Errorf("prioritize: requires either explicit items or itemsKey")
+	var items []string
+	if err := json.Unmarshal([]byte(itemsJSON), &items); err != nil {
+		return nil, fmt.Errorf("prioritize: failed to parse items from %q: %w", r.itemsKey, err)
+	}
+	if len(items) == 0 {
+		return nil, fmt.Errorf("prioritize: no items to rank")
+	}
+	return items, nil
 }
 
 // runIntrospection executes the transform synapse for semantic summary.

@@ -6,26 +6,20 @@ import (
 	"testing"
 
 	"github.com/zoobzio/cogito"
-	cogitotest "github.com/zoobzio/cogito/testing"
 )
 
 func BenchmarkThoughtCreation(b *testing.B) {
 	ctx := context.Background()
-	mem := cogitotest.NewMockMemory()
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		_, err := cogito.New(ctx, mem, "benchmark intent")
-		if err != nil {
-			b.Fatalf("failed to create thought: %v", err)
-		}
+		_ = cogito.New(ctx, "benchmark intent")
 	}
 }
 
 func BenchmarkNoteAccumulation(b *testing.B) {
 	ctx := context.Background()
-	mem := cogitotest.NewMockMemory()
-	thought, _ := cogito.New(ctx, mem, "benchmark intent")
+	thought := cogito.New(ctx, "benchmark intent")
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -39,8 +33,7 @@ func BenchmarkNoteAccumulation(b *testing.B) {
 
 func BenchmarkNoteRetrieval(b *testing.B) {
 	ctx := context.Background()
-	mem := cogitotest.NewMockMemory()
-	thought, _ := cogito.New(ctx, mem, "benchmark intent")
+	thought := cogito.New(ctx, "benchmark intent")
 
 	// Pre-populate with notes.
 	for i := 0; i < 100; i++ {
@@ -60,8 +53,7 @@ func BenchmarkNoteRetrieval(b *testing.B) {
 
 func BenchmarkThoughtClone(b *testing.B) {
 	ctx := context.Background()
-	mem := cogitotest.NewMockMemory()
-	thought, _ := cogito.New(ctx, mem, "benchmark intent")
+	thought := cogito.New(ctx, "benchmark intent")
 
 	// Pre-populate with notes.
 	for i := 0; i < 50; i++ {
@@ -77,8 +69,7 @@ func BenchmarkThoughtClone(b *testing.B) {
 
 func BenchmarkAllNotes(b *testing.B) {
 	ctx := context.Background()
-	mem := cogitotest.NewMockMemory()
-	thought, _ := cogito.New(ctx, mem, "benchmark intent")
+	thought := cogito.New(ctx, "benchmark intent")
 
 	// Pre-populate with notes.
 	for i := 0; i < 100; i++ {
@@ -94,8 +85,7 @@ func BenchmarkAllNotes(b *testing.B) {
 
 func BenchmarkRenderNotesToContext(b *testing.B) {
 	ctx := context.Background()
-	mem := cogitotest.NewMockMemory()
-	thought, _ := cogito.New(ctx, mem, "benchmark intent")
+	thought := cogito.New(ctx, "benchmark intent")
 
 	// Pre-populate with notes.
 	for i := 0; i < 20; i++ {
