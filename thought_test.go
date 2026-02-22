@@ -6,6 +6,16 @@ import (
 	"testing"
 )
 
+// newTestThought creates a Thought for testing.
+func newTestThought(intent string) *Thought {
+	return New(context.Background(), intent)
+}
+
+// newTestThoughtWithTrace creates a Thought with explicit trace ID for testing.
+func newTestThoughtWithTrace(intent, traceID string) *Thought {
+	return NewWithTrace(context.Background(), intent, traceID)
+}
+
 func TestNew(t *testing.T) {
 	thought := newTestThought("test intent")
 
@@ -15,6 +25,10 @@ func TestNew(t *testing.T) {
 
 	if thought.TraceID == "" {
 		t.Error("expected TraceID to be generated")
+	}
+
+	if thought.ID == "" {
+		t.Error("expected ID to be generated")
 	}
 
 	if thought.CreatedAt.IsZero() {
@@ -65,6 +79,10 @@ func TestAddNote(t *testing.T) {
 
 	if retrieved.Created.IsZero() {
 		t.Error("expected Created to be set")
+	}
+
+	if retrieved.ID == "" {
+		t.Error("expected note ID to be generated")
 	}
 }
 

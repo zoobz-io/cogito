@@ -221,7 +221,7 @@ func (c *Converge) Process(ctx context.Context, t *Thought) (*Thought, error) {
 	}
 
 	// Mark notes as published
-	t.MarkNotesPublished()
+	t.MarkNotesPublished(ctx)
 
 	// Emit step completed
 	duration := time.Since(start)

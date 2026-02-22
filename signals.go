@@ -71,17 +71,6 @@ var (
 		"Synthesis phase began",
 	)
 
-	// Seek signals.
-	SeekResultsFound = capitan.NewSignal(
-		"cogito.seek.results_found",
-		"Semantic search returned results",
-	)
-
-	// Survey signals.
-	SurveyResultsFound = capitan.NewSignal(
-		"cogito.survey.results_found",
-		"Task-grouped semantic search returned results",
-	)
 )
 
 // Field keys for cogito event data.
@@ -124,8 +113,4 @@ var (
 	FieldBranchCount = capitan.NewIntKey("branch_count")
 	FieldBranchName  = capitan.NewStringKey("branch_name")
 
-	// Search metadata (for Seek, Survey).
-	FieldSearchQuery = capitan.NewStringKey("search_query")
-	FieldResultCount = capitan.NewIntKey("result_count")
-	FieldSearchLimit = capitan.NewIntKey("search_limit")
 )

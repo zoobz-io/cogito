@@ -131,7 +131,7 @@ func (d *Discern) Process(ctx context.Context, t *Thought) (*Thought, error) {
 	}
 
 	// Mark notes as published
-	t.MarkNotesPublished()
+	t.MarkNotesPublished(ctx)
 
 	// PHASE 3: ROUTING - Execute appropriate processor
 	d.mu.RLock()

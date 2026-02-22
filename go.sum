@@ -1,7 +1,5 @@
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/zoobzio/atom v1.0.0 h1:vFFfheHPMJQztp+/BmTWTIRfixjojqmpD6uM1X6xkuo=
-github.com/zoobzio/atom v1.0.0/go.mod h1:+ciiuq93FK54xwtktR196qPqb2tyt643IUcL94ETk9s=
 github.com/zoobzio/capitan v1.0.0 h1:hEB8XX/FmtIDHKjjTJrUWXkDiZTYa/Jtd/qWO0yc2Dc=
 github.com/zoobzio/capitan v1.0.0/go.mod h1:UNZvqLPX2REzKLVfU4EfL9GRe6zddsj6aSWaqNUGAIw=
 github.com/zoobzio/clockz v1.0.0 h1:B0uzNpgdzqVKewyHUpx+EIZg+zS8Y0tXcVF1qY6IN8A=
