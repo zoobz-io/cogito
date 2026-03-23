@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/zoobzio/zyn"
+	"github.com/zoobz-io/zyn"
 )
 
 // Test extraction type.

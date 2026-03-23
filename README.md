@@ -1,13 +1,13 @@
 # cogito
 
-[![CI Status](https://github.com/zoobzio/cogito/workflows/CI/badge.svg)](https://github.com/zoobzio/cogito/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/zoobzio/cogito/graph/badge.svg?branch=main)](https://codecov.io/gh/zoobzio/cogito)
-[![Go Report Card](https://goreportcard.com/badge/github.com/zoobzio/cogito)](https://goreportcard.com/report/github.com/zoobzio/cogito)
-[![CodeQL](https://github.com/zoobzio/cogito/workflows/CodeQL/badge.svg)](https://github.com/zoobzio/cogito/security/code-scanning)
-[![Go Reference](https://pkg.go.dev/badge/github.com/zoobzio/cogito.svg)](https://pkg.go.dev/github.com/zoobzio/cogito)
-[![License](https://img.shields.io/github/license/zoobzio/cogito)](LICENSE)
-[![Go Version](https://img.shields.io/github/go-mod/go-version/zoobzio/cogito)](go.mod)
-[![Release](https://img.shields.io/github/v/release/zoobzio/cogito)](https://github.com/zoobzio/cogito/releases)
+[![CI Status](https://github.com/zoobz-io/cogito/workflows/CI/badge.svg)](https://github.com/zoobz-io/cogito/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/zoobz-io/cogito/graph/badge.svg?branch=main)](https://codecov.io/gh/zoobz-io/cogito)
+[![Go Report Card](https://goreportcard.com/badge/github.com/zoobz-io/cogito)](https://goreportcard.com/report/github.com/zoobz-io/cogito)
+[![CodeQL](https://github.com/zoobz-io/cogito/workflows/CodeQL/badge.svg)](https://github.com/zoobz-io/cogito/security/code-scanning)
+[![Go Reference](https://pkg.go.dev/badge/github.com/zoobz-io/cogito.svg)](https://pkg.go.dev/github.com/zoobz-io/cogito)
+[![License](https://img.shields.io/github/license/zoobz-io/cogito)](LICENSE)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/zoobz-io/cogito)](go.mod)
+[![Release](https://img.shields.io/github/v/release/zoobz-io/cogito)](https://github.com/zoobz-io/cogito/releases)
 
 LLM-powered reasoning chains with semantic memory for Go.
 
@@ -47,7 +47,7 @@ Introspection adds a semantic summary explaining _why_ — context for subsequen
 ## Install
 
 ```bash
-go get github.com/zoobzio/cogito
+go get github.com/zoobz-io/cogito
 ```
 
 Requires Go 1.21+.
@@ -62,7 +62,7 @@ import (
     "fmt"
     "log"
 
-    "github.com/zoobzio/cogito"
+    "github.com/zoobz-io/cogito"
 )
 
 type TicketData struct {
@@ -126,11 +126,11 @@ func main() {
 
 ## Why cogito?
 
-- **Composable reasoning** — Chain primitives into pipelines via [pipz](https://github.com/zoobzio/pipz)
+- **Composable reasoning** — Chain primitives into pipelines via [pipz](https://github.com/zoobz-io/pipz)
 - **Semantic memory** — Notes persist with vector embeddings for similarity search
 - **Context accumulation** — Each step builds on previous reasoning
 - **Two-phase reasoning** — Deterministic decisions with optional creative introspection
-- **Observable** — Emits [capitan](https://github.com/zoobzio/capitan) signals throughout execution
+- **Observable** — Emits [capitan](https://github.com/zoobz-io/capitan) signals throughout execution
 - **Extensible** — Implement `pipz.Chainable[*Thought]` for custom primitives
 
 ## Semantic Control Flow
@@ -156,7 +156,7 @@ router := cogito.NewDiscern("route", "how should we handle this?",
 
 Control flow adapts to domain changes without code changes — the LLM interprets intent.
 
-Integrate with [flume](https://github.com/zoobzio/flume) for declarative, hot-reloadable pipeline definitions.
+Integrate with [flume](https://github.com/zoobz-io/flume) for declarative, hot-reloadable pipeline definitions.
 
 ## Documentation
 

@@ -61,7 +61,7 @@ linters:
       check-blank: true
       exclude-functions:
         - (io.Closer).Close  # Handled by bodyclose
-        - (github.com/zoobzio/capitan.Capitan).Emit  # Fire-and-forget pattern
+        - (github.com/zoobz-io/capitan.Capitan).Emit  # Fire-and-forget pattern
 
     gocritic:
       enabled-checks:

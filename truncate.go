@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/zoobzio/capitan"
-	"github.com/zoobzio/pipz"
+	"github.com/zoobz-io/capitan"
+	"github.com/zoobz-io/pipz"
 )
 
 // Truncate is a session management primitive that implements pipz.Chainable[*Thought].

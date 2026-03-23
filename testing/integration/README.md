@@ -35,7 +35,7 @@ import (
     "context"
     "testing"
 
-    "github.com/zoobzio/cogito"
+    "github.com/zoobz-io/cogito"
 )
 
 func TestMemoryImplementation(t *testing.T) {

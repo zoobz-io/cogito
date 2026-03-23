@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/zoobzio/zyn"
+	"github.com/zoobz-io/zyn"
 )
 
 // mockPrioritizeProvider implements Provider interface for testing Prioritize.

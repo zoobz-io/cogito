@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/zoobzio/capitan"
-	"github.com/zoobzio/pipz"
-	"github.com/zoobzio/zyn"
+	"github.com/zoobz-io/capitan"
+	"github.com/zoobz-io/pipz"
+	"github.com/zoobz-io/zyn"
 )
 
 // Discern is an LLM-powered semantic routing connector that implements pipz.Chainable[*Thought].

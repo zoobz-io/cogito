@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/zoobzio/capitan"
-	"github.com/zoobzio/pipz"
-	"github.com/zoobzio/zyn"
+	"github.com/zoobz-io/capitan"
+	"github.com/zoobz-io/pipz"
+	"github.com/zoobz-io/zyn"
 )
 
 // Analyze is a structured data extraction primitive that implements pipz.Chainable[*Thought].

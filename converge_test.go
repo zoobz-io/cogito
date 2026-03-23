@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/zoobzio/pipz"
-	"github.com/zoobzio/zyn"
+	"github.com/zoobz-io/pipz"
+	"github.com/zoobz-io/zyn"
 )
 
 // mockConvergeProvider implements Provider interface for testing Converge.

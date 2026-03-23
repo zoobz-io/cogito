@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/zoobzio/zyn"
+	"github.com/zoobz-io/zyn"
 )
 
 // mockAssessProvider implements Provider interface for testing Assess.

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/zoobzio/zyn"
+	"github.com/zoobz-io/zyn"
 )
 
 // mockCategorizeProvider implements Provider interface for testing Categorize.

@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/zoobzio/pipz"
-	"github.com/zoobzio/zyn"
+	"github.com/zoobz-io/pipz"
+	"github.com/zoobz-io/zyn"
 )
 
 // mockSiftProvider implements Provider interface for testing Sift.

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/zoobzio/cogito"
+	"github.com/zoobz-io/cogito"
 )
 
 func BenchmarkThoughtCreation(b *testing.B) {

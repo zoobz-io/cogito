@@ -7,7 +7,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/zoobzio/cogito"
+	"github.com/zoobz-io/cogito"
 )
 
 // NewTestThought creates a Thought for testing.

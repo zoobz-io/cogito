@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/zoobzio/capitan"
-	capitantesting "github.com/zoobzio/capitan/testing"
-	"github.com/zoobzio/zyn"
+	"github.com/zoobz-io/capitan"
+	capitantesting "github.com/zoobz-io/capitan/testing"
+	"github.com/zoobz-io/zyn"
 )
 
 // getStringField extracts a string field value from a captured event.
