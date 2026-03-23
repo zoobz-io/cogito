@@ -5,7 +5,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/zoobzio/zyn"
+	"github.com/zoobz-io/zyn"
 )
 
 // Provider defines the interface for LLM providers.

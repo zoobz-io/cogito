@@ -1,6 +1,6 @@
 package cogito
 
-import "github.com/zoobzio/capitan"
+import "github.com/zoobz-io/capitan"
 
 // Signal definitions for cogito reasoning chain events.
 // Signals follow the pattern: cogito.<entity>.<event>.

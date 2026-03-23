@@ -2,93 +2,48 @@ name: CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
-
-env:
-  GO_VERSION: "1.25"
+    branches: [main]
 
 jobs:
-  # Unit tests with race detection - primary quality gate
-  unit-tests:
-    name: Unit Tests
+  test:
+    name: Test
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        go-version: ["1.24", "1.25"]
+        go-version: ['1.24', '1.25']
+
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Go ${{ matrix.go-version }}
+    - name: Set up Go
       uses: actions/setup-go@v5
       with:
         go-version: ${{ matrix.go-version }}
 
-    - name: Cache Go modules
-      uses: actions/cache@v4
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-${{ matrix.go-version }}-
+    - name: Run unit tests
+      run: make test-unit
 
-    - name: Download dependencies
-      run: go mod download
-
-    - name: Run unit tests with race detection
-      run: go test -v -race -tags=testing -timeout=5m ./...
-
-  # Code quality and security
-  quality:
-    name: Code Quality
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Go ${{ env.GO_VERSION }}
+    - name: Set up Go
       uses: actions/setup-go@v5
       with:
-        go-version: ${{ env.GO_VERSION }}
+        go-version: '1.25'
 
-    - name: Cache Go modules
-      uses: actions/cache@v4
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v7
       with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ env.GO_VERSION }}-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-${{ env.GO_VERSION }}-
+        version: v2.7.2
+        args: --config=.golangci.yml --timeout=5m
 
-    - name: Download dependencies
-      run: go mod download
-
-    - name: Install golangci-lint
-      run: make install-tools
-
-    - name: Run linters
-      run: make lint
-
-    - name: Generate coverage report
-      run: make coverage
-
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
-      with:
-        file: ./coverage.out
-        flags: unittests
-        name: codecov-umbrella
-
-    - name: Upload coverage report
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-report-${{ github.sha }}
-        path: |
-          coverage.out
-          coverage.html
-
-  # Security scanning
   security:
-    name: Security Scan
+    name: Security
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -96,10 +51,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Go ${{ env.GO_VERSION }}
+    - name: Set up Go
       uses: actions/setup-go@v5
       with:
-        go-version: ${{ env.GO_VERSION }}
+        go-version: '1.25'
 
     - name: Run Gosec Security Scanner
       uses: securego/gosec@master
@@ -114,51 +69,25 @@ jobs:
         sarif_file: gosec-results.sarif
         wait-for-processing: true
 
-    - name: Upload security results as artifact
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: gosec-results
-        path: gosec-results.sarif
-        retention-days: 7
-
-  # Performance benchmarks
   benchmark:
-    name: Benchmarks
+    name: Benchmark
     runs-on: ubuntu-latest
+    needs: test
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Go ${{ env.GO_VERSION }}
+    - name: Set up Go
       uses: actions/setup-go@v5
       with:
-        go-version: ${{ env.GO_VERSION }}
-
-    - name: Cache Go modules
-      uses: actions/cache@v4
-      with:
-        path: ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ env.GO_VERSION }}-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-${{ env.GO_VERSION }}-
-
-    - name: Download dependencies
-      run: go mod download
+        go-version: '1.25'
 
     - name: Run benchmarks
-      run: go test -tags=testing -bench=. -benchmem -benchtime=100ms -timeout=10m ./... | tee benchmark-results.txt
+      run: make test-bench
 
-    - name: Upload benchmark results
-      uses: actions/upload-artifact@v4
-      with:
-        name: benchmark-results
-        path: benchmark-results.txt
-        retention-days: 30
-
-  # Overall CI status check
   ci-complete:
     name: CI Complete
-    needs: [unit-tests, quality, security, benchmark]
+    needs: [test, lint, security, benchmark]
     runs-on: ubuntu-latest
     steps:
-    - run: echo "CI complete"
+    - name: All checks passed
+      run: echo "All CI checks passed"

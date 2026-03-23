@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/zoobzio/capitan"
-	"github.com/zoobzio/pipz"
+	"github.com/zoobz-io/capitan"
+	"github.com/zoobz-io/pipz"
 )
 
 // Reset is a session management primitive that implements pipz.Chainable[*Thought].

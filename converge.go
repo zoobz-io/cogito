@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/zoobzio/capitan"
-	"github.com/zoobzio/pipz"
-	"github.com/zoobzio/zyn"
+	"github.com/zoobz-io/capitan"
+	"github.com/zoobz-io/pipz"
+	"github.com/zoobz-io/zyn"
 )
 
 // Converge is a parallel execution primitive with LLM-powered synthesis that implements pipz.Chainable[*Thought].

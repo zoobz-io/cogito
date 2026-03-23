@@ -42,3 +42,6 @@ go.work.sum
 # Profiling
 *.prof
 *.pprof
+
+# Claude
+.claude/

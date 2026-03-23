@@ -21,7 +21,7 @@ testing/
 The `cogitotest` package provides utilities for testing cogito primitives:
 
 ```go
-import "github.com/zoobzio/cogito/testing"
+import "github.com/zoobz-io/cogito/testing"
 
 func TestMyPrimitive(t *testing.T) {
     // Create a thought with mock memory
@@ -97,7 +97,7 @@ package integration_test
 
 import (
     "testing"
-    "github.com/zoobzio/cogito"
+    "github.com/zoobz-io/cogito"
 )
 
 func TestSoyMemory(t *testing.T) {
@@ -114,7 +114,7 @@ package benchmarks_test
 
 import (
     "testing"
-    "github.com/zoobzio/cogito"
+    "github.com/zoobz-io/cogito"
 )
 
 func BenchmarkThoughtCreation(b *testing.B) {

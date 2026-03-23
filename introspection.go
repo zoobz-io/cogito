@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/zoobzio/capitan"
-	"github.com/zoobzio/zyn"
+	"github.com/zoobz-io/capitan"
+	"github.com/zoobz-io/zyn"
 )
 
 // introspectionConfig holds parameters for running introspection.

@@ -1,6 +1,6 @@
 package cogito
 
-import "github.com/zoobzio/zyn"
+import "github.com/zoobz-io/zyn"
 
 // Default configuration for cogito primitives.
 // These can be overridden per-step using builder methods.

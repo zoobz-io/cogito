@@ -1,7 +1,7 @@
 repository:
   name: cogito
   description: LLM-powered reasoning chains with semantic memory for Go
-  homepage: https://github.com/zoobzio/cogito
+  homepage: https://cogito.zoobz.io
   has_wiki: true
   has_downloads: true
   default_branch: main
@@ -9,6 +9,7 @@ repository:
   allow_merge_commit: false
   allow_rebase_merge: false
   delete_branch_on_merge: true
+  topics: go, golang, zoobzio, llm, reasoning, ai, semantic-memory
 
 branches:
   - name: main
