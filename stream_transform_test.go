@@ -391,3 +391,149 @@ func TestStreamTransformClose(t *testing.T) {
 		t.Errorf("unexpected error on close: %v", err)
 	}
 }
+
+// --- Error path tests ---
+
+// mockStreamFailingProvider can be configured to fail at specific call counts.
+type mockStreamFailingProvider struct {
+	callCount int
+	failAt    int // fail on this call number (1-indexed); 0 means never fail
+}
+
+func (m *mockStreamFailingProvider) Call(_ context.Context, messages []zyn.Message, _ float32) (*zyn.ProviderResponse, error) {
+	m.callCount++
+	if m.failAt > 0 && m.callCount >= m.failAt {
+		return nil, fmt.Errorf("provider error at call %d", m.callCount)
+	}
+
+	lastMessage := messages[len(messages)-1]
+
+	// Introspection
+	if strings.Contains(lastMessage.Content, "Transform:") &&
+		strings.Contains(lastMessage.Content, "Synthesize") {
+		return &zyn.ProviderResponse{
+			Content: `{"output": "Summary", "confidence": 0.9, "changes": ["summarized"], "reasoning": ["synthesis"]}`,
+			Usage:   zyn.TokenUsage{Prompt: 10, Completion: 15, Total: 25},
+		}, nil
+	}
+
+	return &zyn.ProviderResponse{
+		Content: `{"output": "Response.", "confidence": 0.9, "changes": ["done"], "reasoning": ["ok"]}`,
+		Usage:   zyn.TokenUsage{Prompt: 10, Completion: 10, Total: 20},
+	}, nil
+}
+
+func (m *mockStreamFailingProvider) Name() string { return "mock-failing" }
+
+// mockFailingStreamingProvider adds Stream support to mockStreamFailingProvider.
+type mockFailingStreamingProvider struct {
+	mockStreamFailingProvider
+	failStream bool // if true, fail during Stream instead of Call
+}
+
+func (m *mockFailingStreamingProvider) Stream(_ context.Context, messages []zyn.Message, temperature float32, callback zyn.StreamCallback) (*zyn.ProviderResponse, error) {
+	if m.failStream {
+		m.callCount++
+		return nil, fmt.Errorf("stream error")
+	}
+	resp, err := m.Call(context.Background(), messages, temperature)
+	if err != nil {
+		return nil, err
+	}
+	if callback != nil {
+		callback(resp.Content)
+	}
+	return resp, nil
+}
+
+func TestStreamTransformStreamingExecutionFailure(t *testing.T) {
+	provider := &mockFailingStreamingProvider{
+		failStream: true,
+	}
+	SetProvider(provider)
+	defer SetProvider(nil)
+
+	stream := NewStreamTransform("output", "Generate analysis", func(_ string) {})
+
+	thought := newTestThought("test streaming failure")
+	thought.SetContent(context.Background(), "input", "data", "test")
+
+	_, err := stream.Process(context.Background(), thought)
+	if err == nil {
+		t.Fatal("expected error on streaming failure")
+	}
+	if !strings.Contains(err.Error(), "streaming execution failed") {
+		t.Errorf("expected streaming execution error, got: %v", err)
+	}
+}
+
+func TestStreamTransformNonStreamingExecutionFailure(t *testing.T) {
+	provider := &mockStreamFailingProvider{failAt: 1}
+	SetProvider(provider)
+	defer SetProvider(nil)
+
+	stream := NewStreamTransform("output", "Generate analysis", nil)
+
+	thought := newTestThought("test non-streaming failure")
+	thought.SetContent(context.Background(), "input", "data", "test")
+
+	_, err := stream.Process(context.Background(), thought)
+	if err == nil {
+		t.Fatal("expected error on non-streaming failure")
+	}
+	if !strings.Contains(err.Error(), "execution failed") {
+		t.Errorf("expected execution error, got: %v", err)
+	}
+}
+
+func TestStreamTransformIntrospectionFailure(t *testing.T) {
+	// First call succeeds (transform), second call fails (introspection)
+	provider := &mockStreamFailingProvider{failAt: 2}
+	SetProvider(provider)
+	defer SetProvider(nil)
+
+	stream := NewStreamTransform("output", "Generate analysis", nil).
+		WithIntrospection()
+
+	thought := newTestThought("test introspection failure")
+	thought.SetContent(context.Background(), "input", "data", "test")
+
+	_, err := stream.Process(context.Background(), thought)
+	if err == nil {
+		t.Fatal("expected error on introspection failure")
+	}
+}
+
+func TestStreamTransformCallbackPanicRecovery(t *testing.T) {
+	provider := &mockStreamTransformProvider{
+		chunks: []string{"chunk1", "chunk2"},
+	}
+	SetProvider(provider)
+	defer SetProvider(nil)
+
+	callCount := 0
+	stream := NewStreamTransform("output", "Generate analysis", func(chunk string) {
+		callCount++
+		if callCount == 1 {
+			panic("callback panic")
+		}
+	})
+
+	thought := newTestThought("test panic recovery")
+	thought.SetContent(context.Background(), "input", "data", "test")
+
+	// Should not panic — the wrapper recovers
+	result, err := stream.Process(context.Background(), thought)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Content should still be stored despite the panic
+	content, err := stream.Scan(result)
+	if err != nil {
+		t.Fatalf("scan failed: %v", err)
+	}
+	if content == "" {
+		t.Error("expected content despite callback panic")
+	}
+}

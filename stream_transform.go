@@ -124,7 +124,23 @@ func (s *StreamTransform) Process(ctx context.Context, t *Thought) (*Thought, er
 	// Execute: streaming or non-streaming based on callback
 	var result string
 	if s.callback != nil {
-		result, err = transformSynapse.FireStreamWithInput(ctx, t.Session, input, s.callback)
+		// Wrap callback with panic recovery — the callback is user-provided code
+		// running inside zyn's streaming loop. A panic would propagate through
+		// zyn internals and crash the pipeline.
+		safe := func(chunk string) {
+			defer func() {
+				if r := recover(); r != nil {
+					capitan.Error(ctx, StepFailed,
+						FieldTraceID.Field(t.TraceID),
+						FieldStepName.Field(s.key),
+						FieldStepType.Field("stream_transform"),
+						FieldError.Field(fmt.Errorf("callback panic: %v", r)),
+					)
+				}
+			}()
+			s.callback(chunk)
+		}
+		result, err = transformSynapse.FireStreamWithInput(ctx, t.Session, input, safe)
 		if err != nil {
 			s.emitFailed(ctx, t, start, err)
 			return t, fmt.Errorf("stream_transform: streaming execution failed: %w", err)
