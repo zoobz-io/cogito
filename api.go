@@ -40,6 +40,9 @@
 //   - [NewCompress] - LLM-summarize session history to reduce tokens
 //   - [NewTruncate] - Sliding window session trimming (no LLM)
 //
+// Streaming:
+//   - [NewStreamTransform] - Stream LLM tokens via callback, store complete result
+//
 // Synthesis:
 //   - [NewAmplify] - Iterative refinement until criteria met
 //   - [NewConverge] - Parallel execution with semantic synthesis

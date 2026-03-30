@@ -57,6 +57,12 @@ var (
 		"Refinement met completion criteria",
 	)
 
+	// Stream signals.
+	StreamCompleted = capitan.NewSignal(
+		"cogito.stream.completed",
+		"Streaming transform finished token delivery",
+	)
+
 	// Converge signals.
 	ConvergeBranchStarted = capitan.NewSignal(
 		"cogito.converge.branch.started",
@@ -108,6 +114,9 @@ var (
 
 	// Iteration metadata (for Amplify).
 	FieldIterationCount = capitan.NewIntKey("iteration_count")
+
+	// Streaming metadata (for StreamTransform).
+	FieldStreamedSize = capitan.NewIntKey("streamed_size") // total streamed character count
 
 	// Branch metadata (for Converge).
 	FieldBranchCount = capitan.NewIntKey("branch_count")
