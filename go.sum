@@ -8,5 +8,5 @@ github.com/zoobz-io/pipz v1.0.5 h1:PEY7KhIV+PFPseRcFVbo2gHoCFjKcDPz040/46jzcmM=
 github.com/zoobz-io/pipz v1.0.5/go.mod h1:Fqif5Ciw0GViOA1FbR2BBnSeOF0fWB9MCQ//ViGuGhs=
 github.com/zoobz-io/sentinel v1.0.4 h1:nGn4zzwwjmd30tJ2nf75xgvkw47lrD+0dDYFMCg1s1k=
 github.com/zoobz-io/sentinel v1.0.4/go.mod h1:/Bao7Ro0XVh5oxDZBjpFaNuKosXY3wT5ccjtDnC4lRs=
-github.com/zoobz-io/zyn v1.0.2 h1:MtrS3zBsGwr7U1kQY7eGEboCA0yX4beUexV7SuHpaZI=
-github.com/zoobz-io/zyn v1.0.2/go.mod h1:gGOFXqjxtaLZpgIt89oKs+xp8b77xUUrfTNs8PJl2k4=
+github.com/zoobz-io/zyn v1.0.3 h1:AT8n7VQ04HxKfik12EJSKzowJs5l4eXzcgSRkKtg4vM=
+github.com/zoobz-io/zyn v1.0.3/go.mod h1:gGOFXqjxtaLZpgIt89oKs+xp8b77xUUrfTNs8PJl2k4=
