@@ -8,7 +8,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/zoobz-io/capitan v1.0.2
 	github.com/zoobz-io/pipz v1.0.5
-	github.com/zoobz-io/zyn v1.0.3
+	github.com/zoobz-io/zyn v1.0.4
 )
 
 require (
