@@ -43,6 +43,9 @@
 // Streaming:
 //   - [NewStreamTransform] - Stream LLM tokens via callback, store complete result
 //
+// Tool Use:
+//   - [NewEngage] - LLM-driven tool execution loop with streaming support
+//
 // Synthesis:
 //   - [NewAmplify] - Iterative refinement until criteria met
 //   - [NewConverge] - Parallel execution with semantic synthesis
