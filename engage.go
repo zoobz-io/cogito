@@ -27,6 +27,7 @@ type ToolExecutor interface {
 type EngageResult struct {
 	Content    string       `json:"content"`    // Final text response from LLM
 	Iterations int          `json:"iterations"` // Number of loop iterations (1 = no tool use)
+	Completed  bool         `json:"completed"`  // Whether the LLM finished naturally (vs max iterations exhausted)
 	ToolCalls  []ToolRecord `json:"tool_calls"` // All tool calls made during engagement
 }
 
@@ -164,6 +165,7 @@ func (e *Engage) Process(ctx context.Context, t *Thought) (*Thought, error) {
 	// Tool execution loop
 	var records []ToolRecord
 	var lastResp *zyn.ProviderResponse
+	var completed bool
 	iteration := 0
 
 	for iteration < e.maxIterations {
@@ -198,6 +200,7 @@ func (e *Engage) Process(ctx context.Context, t *Thought) (*Thought, error) {
 
 		// Terminal: text response or no tool calls
 		if resp.StopReason != zyn.StopReasonToolUse || len(resp.ToolCalls) == 0 {
+			completed = true
 			// Append assistant message
 			messages = append(messages, zyn.Message{
 				Role:    zyn.RoleAssistant,
@@ -290,6 +293,7 @@ func (e *Engage) Process(ctx context.Context, t *Thought) (*Thought, error) {
 	result := EngageResult{
 		Content:    content,
 		Iterations: iteration,
+		Completed:  completed,
 		ToolCalls:  records,
 	}
 	resultJSON, err := json.Marshal(result)

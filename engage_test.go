@@ -161,6 +161,9 @@ func TestEngageNoToolUse(t *testing.T) {
 	if output.Iterations != 1 {
 		t.Errorf("expected 1 iteration, got %d", output.Iterations)
 	}
+	if !output.Completed {
+		t.Error("expected completed to be true")
+	}
 	if len(output.ToolCalls) != 0 {
 		t.Errorf("expected 0 tool calls, got %d", len(output.ToolCalls))
 	}
@@ -316,6 +319,9 @@ func TestEngageMaxIterationsReached(t *testing.T) {
 
 	if output.Iterations != 3 {
 		t.Errorf("expected 3 iterations (max), got %d", output.Iterations)
+	}
+	if output.Completed {
+		t.Error("expected completed to be false when max iterations exhausted")
 	}
 	// Content may be empty since last response was tool_use
 	if output.Content != "" {
