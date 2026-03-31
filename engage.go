@@ -169,6 +169,12 @@ func (e *Engage) Process(ctx context.Context, t *Thought) (*Thought, error) {
 	iteration := 0
 
 	for iteration < e.maxIterations {
+		// Check context before entering a new iteration — avoids executing
+		// tools with side effects after cancellation.
+		if ctx.Err() != nil {
+			e.emitFailed(ctx, t, start, ctx.Err())
+			return t, fmt.Errorf("engage: context canceled: %w", ctx.Err())
+		}
 		iteration++
 
 		// Call provider
@@ -230,8 +236,8 @@ func (e *Engage) Process(ctx context.Context, t *Thought) (*Thought, error) {
 				return t, fmt.Errorf("engage: failed to persist tool call note: %w", noteErr)
 			}
 
-			// Execute tool
-			result, execErr := e.executor.Execute(ctx, tc)
+			// Execute tool with panic recovery
+			result, execErr := e.safeExecute(ctx, tc)
 			record := ToolRecord{
 				Name:  tc.Name,
 				Input: string(tc.Input),
@@ -331,6 +337,19 @@ func (e *Engage) emitFailed(ctx context.Context, t *Thought, start time.Time, er
 		FieldStepDuration.Field(time.Since(start)),
 		FieldError.Field(err),
 	)
+}
+
+// safeExecute wraps executor.Execute with panic recovery.
+// Tool executors are application-supplied code — a panic would crash the pipeline.
+// Panics are converted to errors and fed back to the LLM as tool error results.
+func (e *Engage) safeExecute(ctx context.Context, tc zyn.ToolCall) (result string, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			result = ""
+			err = fmt.Errorf("tool executor panic: %v", r)
+		}
+	}()
+	return e.executor.Execute(ctx, tc)
 }
 
 // Scan retrieves the typed engage result from a thought.

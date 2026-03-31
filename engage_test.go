@@ -680,6 +680,94 @@ func TestEngageNoteMetadata(t *testing.T) {
 	}
 }
 
+func TestEngageExecutorPanicRecovery(t *testing.T) {
+	provider := &mockEngageProvider{
+		responses: []*zyn.ProviderResponse{
+			toolResponse(tc("call_1", "search", `{"query":"panic"}`)),
+			textResponse("Handled the panic"),
+		},
+	}
+	SetProvider(provider)
+	defer SetProvider(nil)
+
+	executor := &mockToolExecutor{
+		tools:   []zyn.Tool{{Name: "search", Description: "Search"}},
+		results: map[string]string{},
+	}
+	// Override Execute to panic
+	panicExecutor := &panicToolExecutor{tools: executor.tools}
+
+	engage := NewEngage("answer", "Answer", panicExecutor)
+
+	thought := newTestThought("test executor panic")
+	thought.SetContent(context.Background(), "question", "Panic test", "user")
+
+	result, err := engage.Process(context.Background(), thought)
+	if err != nil {
+		t.Fatalf("unexpected error — panic should be recovered: %v", err)
+	}
+
+	output, err := engage.Scan(result)
+	if err != nil {
+		t.Fatalf("scan failed: %v", err)
+	}
+
+	if len(output.ToolCalls) != 1 {
+		t.Fatalf("expected 1 tool call, got %d", len(output.ToolCalls))
+	}
+	if !output.ToolCalls[0].Error {
+		t.Error("expected tool call to be marked as error")
+	}
+	if !strings.Contains(output.ToolCalls[0].Output, "panic") {
+		t.Errorf("expected panic in error output, got %q", output.ToolCalls[0].Output)
+	}
+}
+
+// panicToolExecutor panics on Execute.
+type panicToolExecutor struct {
+	tools []zyn.Tool
+}
+
+func (p *panicToolExecutor) ListTools() []zyn.Tool {
+	return p.tools
+}
+
+func (p *panicToolExecutor) Execute(_ context.Context, _ zyn.ToolCall) (string, error) {
+	panic("executor exploded")
+}
+
+func TestEngageContextCancellation(t *testing.T) {
+	provider := &mockEngageProvider{
+		responses: []*zyn.ProviderResponse{
+			toolResponse(tc("call_1", "search", `{"query":"test"}`)),
+			textResponse("Should not reach here"),
+		},
+	}
+	SetProvider(provider)
+	defer SetProvider(nil)
+
+	executor := newTestExecutor()
+	engage := NewEngage("answer", "Answer", executor)
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	thought := newTestThought("test ctx cancel")
+	thought.SetContent(ctx, "question", "Cancel me", "user")
+
+	// Cancel context before process — first iteration will fail ctx check on second iteration
+	// Actually we need to cancel after the first call returns tool_use
+	// So let's just cancel before Process starts
+	cancel()
+
+	_, err := engage.Process(ctx, thought)
+	if err == nil {
+		t.Fatal("expected error on canceled context")
+	}
+	if !strings.Contains(err.Error(), "context canceled") {
+		t.Errorf("expected context canceled error, got: %v", err)
+	}
+}
+
 func TestEngageMaxIterationsMinimum(t *testing.T) {
 	executor := newTestExecutor()
 	engage := NewEngage("answer", "Answer", executor).WithMaxIterations(0)
