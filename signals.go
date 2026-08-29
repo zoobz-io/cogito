@@ -63,6 +63,16 @@ var (
 		"Streaming transform finished token delivery",
 	)
 
+	// Engage signals.
+	EngageIterationCompleted = capitan.NewSignal(
+		"cogito.engage.iteration.completed",
+		"Tool use iteration completed",
+	)
+	EngageToolCallCompleted = capitan.NewSignal(
+		"cogito.engage.tool_call.completed",
+		"Individual tool call executed",
+	)
+
 	// Converge signals.
 	ConvergeBranchStarted = capitan.NewSignal(
 		"cogito.converge.branch.started",
@@ -117,6 +127,11 @@ var (
 
 	// Streaming metadata (for StreamTransform).
 	FieldStreamedSize = capitan.NewIntKey("streamed_size") // total streamed character count
+
+	// Tool metadata (for Engage).
+	FieldToolName      = capitan.NewStringKey("tool_name")
+	FieldToolCallCount = capitan.NewIntKey("tool_call_count")
+	FieldToolError     = capitan.NewBoolKey("tool_error")
 
 	// Branch metadata (for Converge).
 	FieldBranchCount = capitan.NewIntKey("branch_count")
